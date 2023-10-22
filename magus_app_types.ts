@@ -1,3 +1,14 @@
+import primStatAst from "@images/primStat_ast.webp"
+import primStatBea from "@images/primStat_bea.webp"
+import primStatCon from "@images/primStat_con.webp"
+import primStatDex from "@images/primStat_dex.webp"
+import primStatHea from "@images/primStat_hea.webp"
+import primStatInt from "@images/primStat_int.webp"
+import primStatLuc from "@images/primStat_luc.webp"
+import primStatSpe from "@images/primStat_spe.webp"
+import primStatStr from "@images/primStat_str.webp"
+import primStatWip from "@images/primStat_wip.webp"
+
 /*********************************************
  ************** APPLICATION TYPES**************
  *********************************************/
@@ -127,6 +138,7 @@ export namespace Adventure {
  *********************************************/
 
 export namespace Character {
+
 	export const enum RACES {
 		ELF = "Elf",
 		HALF_ELF = "Fél-elf",
@@ -172,7 +184,8 @@ export namespace Character {
 		WIP = "Akaraterő",
 		CON = "Állóképesség",
 		HEA = "Egészség",
-		BEA = "Szépség"
+		BEA = "Szépség",
+		LUC = "Szerencse",
 	}
 
 	export const enum SECONDARY_STAT_LEVEL {
@@ -234,6 +247,7 @@ export namespace Character {
 	export type TLevelElements = {
 		current: number;
 		currentXp: number;
+		//on hover show next level xp + current level xp
 		nextXp: typeof LEVEL_CAPS[keyof typeof LEVEL_CAPS];
 	};
 
@@ -251,10 +265,10 @@ export namespace Character {
 	};
 
 	export type THmElements = {
-		AR: THmElementsValue;
-		DR: THmElementsValue;
-		IR: THmElementsValue;
-		TR: THmElementsValue;
+		ATK: THmElementsValue;
+		DEF: THmElementsValue;
+		INI: THmElementsValue;
+		AIM: THmElementsValue;
 		hmPerLvl: number;
 	};
 
@@ -445,5 +459,22 @@ export namespace User {
 	export interface IUserContext {
 		user: IUserData;
 		setUser: (val: TUpdateUser) => void;
+	}
+}
+
+
+
+export const IMGS = {
+	PRIM_STAT: {
+		[Character.PRIMARY_STATS.AST]: primStatAst,
+		[Character.PRIMARY_STATS.BEA]: primStatBea,
+		[Character.PRIMARY_STATS.CON]: primStatCon,
+		[Character.PRIMARY_STATS.DEX]: primStatDex,
+		[Character.PRIMARY_STATS.HEA]: primStatHea,
+		[Character.PRIMARY_STATS.INT]: primStatInt,
+		[Character.PRIMARY_STATS.LUC]: primStatLuc,
+		[Character.PRIMARY_STATS.SPE]: primStatSpe,
+		[Character.PRIMARY_STATS.STR]: primStatStr,
+		[Character.PRIMARY_STATS.WIP]: primStatWip,
 	}
 }
