@@ -1,63 +1,69 @@
-import primStatAst from "@images/primStat_ast.webp"
-import primStatBea from "@images/primStat_bea.webp"
-import primStatCon from "@images/primStat_con.webp"
-import primStatDex from "@images/primStat_dex.webp"
-import primStatHea from "@images/primStat_hea.webp"
-import primStatInt from "@images/primStat_int.webp"
-import primStatLuc from "@images/primStat_luc.webp"
-import primStatSpe from "@images/primStat_spe.webp"
-import primStatStr from "@images/primStat_str.webp"
-import primStatWip from "@images/primStat_wip.webp"
 
 /*********************************************
  ************** APPLICATION TYPES**************
  *********************************************/
 
-export const PLACEHOLDER = {
-	NUMBER: -1,
-	STRING: "STRING_PLACEHOLDER",
-}
-
-export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
-
-export interface IRegexErrorArray {
-    value: boolean;
-    msg: string;
-}
-
 export namespace Application {
-	export type TListOfTypes =
-		(typeof LIST_OF_POST_REQ_TYPES)[keyof typeof LIST_OF_POST_REQ_TYPES];
+	export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
-	export const enum ERROR_MSGS {
+	export interface IRegexErrorArray {
+		value: boolean;
+		msg: string;
+	}
+
+	export const PLACEHOLDER = {
+		NUMBER: -1,
+		STRING: "STRING_Application.PLACEHOLDER",
+	}
+
+	export const enum ERROR {
 		WRONG_PWD = "Jelszó nem jó",
 		WRONG_NAME = "Felhasználónév nem jó",
 		WRONG_CONTENT_TYPE = "Content-Type Request header nem jó",
 		WRONG_END_POINT = "URL Endpoint nem jó",
 		WRONG_METHOD = "Request method nem jó",
+		WRONG_CONTENT = "Request body nem jó",
+		WRONG_ID = "Request id nem jó",
+		REQUEST_EMPTY_BODY = "Request body üres",
+		REQUEST_INCORRECTLY_FORMED = "Request body nem jó formátumú",
+		USER_CREATION_FAILED = "Felhasználó létrehozása sikertelen",
+
 	}
+
+	export const enum EVENTS {
+		CONNECTED = "connected",
+		CLIENT_JOIN_ROOM= "Csatlakozás szobához",
+		CLIENT_SEND_ROOM_MESSAGE= "Üzenet küldése szobába",
+	};
 
 	export const enum LIST_OF_POST_REQ_TYPES {
-		LOGINUNAME = "loginUName",
-		LOGINPWD = "loginPwd",
+		LOGIN = "login",
 		ERROR = "error",
 		LOGOUT = "logout",
+		SYNC_VARS = "sync_vars",
 	}
 
-	export type TRequest = (
-		inputData: Application.IRequestData,
+	export type TRequest<T> = (
+		inputData: Application.IRequestData<T>,
 		callback?: Function | void
 	) => Promise<void | any>;
 
-	export interface IResponseData {
+	export interface IResponseData<T> {
 		error?: boolean;
 		errorMsg?: string | null;
-		data?: Record<string, string>[] | Record<string, string> | null;
+		data?: T;
+		requestId?: string | null;
+		requestTimestamp?: number | null;
+		responseTimestamp: number;
 	}
 
-	export interface IRequestData {
-		type: TListOfTypes;
-		data?: Record<string, string>[] | Record<string, string>;
+	export interface IRequestData<T> {
+		error?: boolean;
+		errorMsg?: string | null;
+		type?: Application.LIST_OF_POST_REQ_TYPES | User.LIST_OF_POST_REQ_TYPES | Application.EVENTS
+		data?: T;
+		requestId: string | null;
+		requestTimestamp: number | null;
 	}
 
 	export interface IError {
@@ -94,7 +100,7 @@ export namespace Adventure {
 		id: number;
 		name: string;
 		notes: INote[];
-		character: Character.TCharacterModel;
+		characters: Character.TCharacterModel[];
 		creationDate: string;
 		lastUpdate: string;
 	}
@@ -191,7 +197,7 @@ export namespace Character {
 	export const enum SECONDARY_STAT_LEVEL {
 		BASIC = "Alap",
 		MASTER = "Mester",
-		PLACEHOLDER = "Placeholder",
+		PLACEHOLDER = "Application.PLACEHOLDER",
 	}
 
 	export const enum RESOURCE_TYPE {
@@ -201,10 +207,10 @@ export namespace Character {
 	}
 
 	export const enum HM {
-		AP = "TÁ",
-		DE = "VÉ",
-		IN = "KE",
-		TA = "CÉ"
+		ATK = "TÁ",
+		DEF = "VÉ",
+		INI = "KE",
+		AIM = "CÉ"
 	}
 
 	export const enum SPELL_TYPE {
@@ -233,6 +239,7 @@ export namespace Character {
 	]
 
 	export type TCharacterModel = {
+		id: string;
 		ownerId: string;
 		level: TLevelElements;
 		race: RACES;
@@ -247,8 +254,7 @@ export namespace Character {
 	export type TLevelElements = {
 		current: number;
 		currentXp: number;
-		//on hover show next level xp + current level xp
-		nextXp: typeof LEVEL_CAPS[keyof typeof LEVEL_CAPS];
+		nextXp: number;
 	};
 
 	// CHARACTER STATS
@@ -284,7 +290,7 @@ export namespace Character {
 		skinColor: string;
 		hair: string;
 		hairColor: string;
-		eye?: {
+		eye: {
 			color?: string;
 			description?: string;
 		};
@@ -292,12 +298,9 @@ export namespace Character {
 		weight: number;
 		description: string;
 		religion: string;
-		bornPlace?: string;
-		schools?: string[];
-		personality?: {
-			name: string;
-			description: string;
-		};
+		bornPlace: string;
+		schools: string[];
+		personality: string;
 	};
 
 	// MODELS
@@ -399,6 +402,21 @@ export namespace Character {
 			COPPER = "Copper",
 		}
 
+		export const enum ITEM_TYPE_EQUIPPABLE {
+			HEAD = "Fejes",
+			NECK = "Nyaklánc",
+			SHOULDER = "Vállas",
+			BACK = "Köpeny",
+			CHEST = "Pámcél",
+			GLOVES = "Kesztyű",
+			BRACERS = "Karperec",
+			LEGS = "Nadrág",
+			BOOTS = "Csizma",
+			ACCESSORY = "Kiegészítő",
+			WEP2H = "Kétkezes fegyver",
+			WEP1H = "Egykezes fegyver",
+		}
+
 		export type TMoney = [
 			{
 				name: MONEY.GOLD;
@@ -440,41 +458,46 @@ export namespace Character {
  *********************************************/
 
 export namespace User {
+
+	export const enum ERROR {
+		ALREADY_LOGGED_IN = "already_logged_in",
+	}
+
+	export enum LIST_OF_POST_REQ_TYPES {
+		USER_DBGET = "user_db_get",
+		USER_DBGET_ALL = "user_db_get_all",
+		USER_DBDELETE = "user_db_delete",
+		USER_CREATE = "user_create",
+		USER_UPDATE = "user_update",
+		USER_GET = "user_get",
+		USER_GET_ALL = "user_get_all",
+		USER_DELETE = "user_delete",
+		USER_SET_SOCKET_ID = "user_set_socket_id",
+		USER_PUSH_TO_STACK = "user_push_to_stack",
+		USER_DELETE_FROM_STACK = "user_delete_from_stack",
+	}
+
 	export enum USER_RANK {
 		ADMIN = "ADMIN",
 		UNAUTH = "UNAUTH",
 		USER = "USER",
 	}
 
-	export interface IUserData {
+	export interface IUserDataClient {
 		id: string;
 		uid: string;
-		pwd: string;
+		name: string;
 		rank: USER_RANK;
 		keepLoggedIn: boolean;
+		login: string[];
+		createdAt: string;
+		socketId?: string;
 	}
 
-	export type TUpdateUser = Optional<IUserData, keyof IUserData>;
+	export type TUpdateUser = Application.Optional<IUserDataClient, keyof IUserDataClient>;
 
 	export interface IUserContext {
-		user: IUserData;
+		user: IUserDataClient;
 		setUser: (val: TUpdateUser) => void;
-	}
-}
-
-
-
-export const IMGS = {
-	PRIM_STAT: {
-		[Character.PRIMARY_STATS.AST]: primStatAst,
-		[Character.PRIMARY_STATS.BEA]: primStatBea,
-		[Character.PRIMARY_STATS.CON]: primStatCon,
-		[Character.PRIMARY_STATS.DEX]: primStatDex,
-		[Character.PRIMARY_STATS.HEA]: primStatHea,
-		[Character.PRIMARY_STATS.INT]: primStatInt,
-		[Character.PRIMARY_STATS.LUC]: primStatLuc,
-		[Character.PRIMARY_STATS.SPE]: primStatSpe,
-		[Character.PRIMARY_STATS.STR]: primStatStr,
-		[Character.PRIMARY_STATS.WIP]: primStatWip,
 	}
 }
