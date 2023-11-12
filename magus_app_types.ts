@@ -3,6 +3,8 @@
  ************** APPLICATION TYPES**************
  *********************************************/
 
+import { Types } from "mongoose";
+
 export namespace Application {
 	export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
@@ -17,6 +19,7 @@ export namespace Application {
 	}
 
 	export const enum ERROR {
+		NO_ACTION = "Nincs action",
 		WRONG_PWD = "Jelszó nem jó",
 		WRONG_NAME = "Felhasználónév nem jó",
 		WRONG_CONTENT_TYPE = "Content-Type Request header nem jó",
@@ -27,16 +30,17 @@ export namespace Application {
 		REQUEST_EMPTY_BODY = "Request body üres",
 		REQUEST_INCORRECTLY_FORMED = "Request body nem jó formátumú",
 		USER_CREATION_FAILED = "Felhasználó létrehozása sikertelen",
+		ALREADY_LOGGED_IN = "Felhasználó már be van jelentkezve",
 
 	}
 
 	export const enum EVENTS {
 		CONNECTED = "connected",
 		CLIENT_JOIN_ROOM= "Csatlakozás szobához",
-		CLIENT_SEND_ROOM_MESSAGE= "Üzenet küldése szobába",
+		CLIENT_SEND_ROOM_MESSAGE= "Üzenet küldése szobába"
 	};
 
-	export const enum LIST_OF_POST_REQ_TYPES {
+	export const enum REQUEST {
 		LOGIN = "login",
 		ERROR = "error",
 		LOGOUT = "logout",
@@ -60,7 +64,7 @@ export namespace Application {
 	export interface IRequestData<T> {
 		error?: boolean;
 		errorMsg?: string | null;
-		type?: Application.LIST_OF_POST_REQ_TYPES | User.LIST_OF_POST_REQ_TYPES | Application.EVENTS
+		type?: Application.REQUEST | User.REQUEST | Application.EVENTS | Adventure.REQUEST | Character.REQUEST;
 		data?: T;
 		requestId: string | null;
 		requestTimestamp: number | null;
@@ -80,6 +84,23 @@ export namespace Application {
  *********************************************/
 
 export namespace Adventure {
+
+	export enum REQUEST {
+		ADVENTURE_CREATE = "adventure_create",
+		ADVENTURE_UPDATE = "adventure_update",
+		ADVENTURE_GET = "adventure_get",
+		ADVENTURE_GET_ALL = "adventure_get_all",
+		ADVENTURE_DELETE = "adventure_delete",
+		ADVENTURE_ADD_CHARACTER = "adventure_add_character",
+		ADVENTURE_REMOVE_CHARACTER = "adventure_remove_character",
+		ADVENTURE_ADD_NOTE = "adventure_add_note",
+		ADVENTURE_REMOVE_NOTE = "adventure_remove_note",
+		ADVENTURE_UPDATE_NOTE = "adventure_remove_note",
+		ADVENTURE_GET_STACK = "adventure_get_stack",
+		ADVENTURE_GET_ALL_STACK = "adventure_get_all_stack",
+		ADVENTURE_DELETE_FROM_STACK = "adventure_delete_from_stack",
+		ADVENTURE_PUSH_TO_STACK = "adventure_push_to_stack",
+	}
 	export const enum DICE {
 		SIX = 6,
 		TEN = 10,
@@ -90,25 +111,24 @@ export namespace Adventure {
 	export type TCharacterAdventureData = {
 		id: number;
 		name: string;
-		notes: INote[];
 		character: Character.TCharacterModel;
-		creationDate: string;
-		lastUpdate: string;
+		createdAt: Date;
+		updatedAt: Date | null;
 	};
 
 	export interface IAdventure {
-		id: number;
 		name: string;
 		notes: INote[];
 		characters: Character.TCharacterModel[];
-		creationDate: string;
-		lastUpdate: string;
+		createdAt: Date;
+		updatedAt: Date | null;
 	}
 
 	export interface INote {
-		id: number;
-		date: string;
-		sendBy: string;
+		_id?: number;
+		createdAt: Date;
+		updatedAt: Date | null;
+		sendBy: Types.ObjectId;
 		text: string;
 	}
 
@@ -237,6 +257,19 @@ export namespace Character {
 		8000,
 		9000,
 	]
+
+	export enum REQUEST {
+		CHARACTER_DB_GET = "character_db_get",
+		CHARACTER_DB_GET_ALL = "character_db_get_all",
+		CHARACTER_DB_DELETE = "character_db_delete",
+		CHARACTER_DB_CREATE = "character_db_create",
+		CHARACTER_UPDATE = "character_update",
+		CHARACTER_GET = "character_get",
+		CHARACTER_GET_ALL = "character_get_all",
+		CHARACTER_SET_SOCKET_ID = "character_set_socket_id",
+		CHARACTER_PUSH_TO_STACK = "character_push_to_stack",
+		CHARACTER_DELETE_FROM_STACK = "character_delete_from_stack",
+	}
 
 	export type TCharacterModel = {
 		id: string;
@@ -463,15 +496,14 @@ export namespace User {
 		ALREADY_LOGGED_IN = "already_logged_in",
 	}
 
-	export enum LIST_OF_POST_REQ_TYPES {
-		USER_DBGET = "user_db_get",
-		USER_DBGET_ALL = "user_db_get_all",
-		USER_DBDELETE = "user_db_delete",
-		USER_CREATE = "user_create",
+	export enum REQUEST {
+		USER_DB_GET = "user_db_get",
+		USER_DB_GET_ALL = "user_db_get_all",
+		USER_DB_DELETE = "user_db_delete",
+		USER_DB_CREATE = "USER_DB_CREATE",
 		USER_UPDATE = "user_update",
 		USER_GET = "user_get",
 		USER_GET_ALL = "user_get_all",
-		USER_DELETE = "user_delete",
 		USER_SET_SOCKET_ID = "user_set_socket_id",
 		USER_PUSH_TO_STACK = "user_push_to_stack",
 		USER_DELETE_FROM_STACK = "user_delete_from_stack",
@@ -490,7 +522,8 @@ export namespace User {
 		rank: USER_RANK;
 		keepLoggedIn: boolean;
 		login: string[];
-		createdAt: string;
+		createdAt: Date;
+		updatedAt: Date | null;
 		socketId?: string;
 	}
 
