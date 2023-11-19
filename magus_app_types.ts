@@ -3,10 +3,12 @@
  ************** APPLICATION TYPES**************
  *********************************************/
 
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
 
 export namespace Application {
 	export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
+
+	export type EnumerateEnum<T> = { [K in keyof T]: T[K] };
 
 	export interface IRegexErrorArray {
 		value: boolean;
@@ -18,10 +20,11 @@ export namespace Application {
 		STRING: "STRING_Application.PLACEHOLDER",
 	}
 
-	export const enum ERROR {
+	export enum ERROR {
 		NO_ACTION = "Nincs action",
 		WRONG_PWD = "Jelszó nem jó",
 		WRONG_NAME = "Felhasználónév nem jó",
+		WRONG_NAME_OR_PWD = "Felhasználónév vagy jelszó nem jó",
 		WRONG_CONTENT_TYPE = "Content-Type Request header nem jó",
 		WRONG_END_POINT = "URL Endpoint nem jó",
 		WRONG_METHOD = "Request method nem jó",
@@ -31,18 +34,20 @@ export namespace Application {
 		REQUEST_INCORRECTLY_FORMED = "Request body nem jó formátumú",
 		USER_CREATION_FAILED = "Felhasználó létrehozása sikertelen",
 		ALREADY_LOGGED_IN = "Felhasználó már be van jelentkezve",
+		UNKNOWN_REQUEST = "Ismeretlen request",
+		DB_ERROR = "Adatbázis hiba",
+		GET_ERROR = "GET method hiba",
 
 	}
 
-	export const enum EVENTS {
+	export enum EVENTS {
 		CONNECTED = "connected",
 		CLIENT_JOIN_ROOM= "Csatlakozás szobához",
 		CLIENT_SEND_ROOM_MESSAGE= "Üzenet küldése szobába"
 	};
 
-	export const enum REQUEST {
+	export enum REQUEST {
 		LOGIN = "login",
-		ERROR = "error",
 		LOGOUT = "logout",
 		SYNC_VARS = "sync_vars",
 	}
@@ -64,7 +69,7 @@ export namespace Application {
 	export interface IRequestData<T> {
 		error?: boolean;
 		errorMsg?: string | null;
-		type?: Application.REQUEST | User.REQUEST | Application.EVENTS | Adventure.REQUEST | Character.REQUEST;
+		type?: Application.REQUEST | Application.ERROR | User.REQUEST | Application.EVENTS | Adventure.REQUEST | Character.REQUEST;
 		data?: T;
 		requestId: string | null;
 		requestTimestamp: number | null;
@@ -86,22 +91,22 @@ export namespace Application {
 export namespace Adventure {
 
 	export enum REQUEST {
-		ADVENTURE_CREATE = "adventure_create",
-		ADVENTURE_UPDATE = "adventure_update",
-		ADVENTURE_GET = "adventure_get",
-		ADVENTURE_GET_ALL = "adventure_get_all",
-		ADVENTURE_DELETE = "adventure_delete",
-		ADVENTURE_ADD_CHARACTER = "adventure_add_character",
-		ADVENTURE_REMOVE_CHARACTER = "adventure_remove_character",
-		ADVENTURE_ADD_NOTE = "adventure_add_note",
-		ADVENTURE_REMOVE_NOTE = "adventure_remove_note",
-		ADVENTURE_UPDATE_NOTE = "adventure_remove_note",
-		ADVENTURE_GET_STACK = "adventure_get_stack",
-		ADVENTURE_GET_ALL_STACK = "adventure_get_all_stack",
-		ADVENTURE_DELETE_FROM_STACK = "adventure_delete_from_stack",
-		ADVENTURE_PUSH_TO_STACK = "adventure_push_to_stack",
+		CREATE = "adventure_create",
+		UPDATE = "adventure_update",
+		GET = "adventure_get",
+		GET_ALL = "adventure_get_all",
+		DELETE = "adventure_delete",
+		ADD_CHARACTER = "adventure_add_character",
+		REMOVE_CHARACTER = "adventure_remove_character",
+		ADD_NOTE = "adventure_add_note",
+		REMOVE_NOTE = "adventure_remove_note",
+		UPDATE_NOTE = "adventure_remove_note",
+		GET_STACK = "adventure_get_stack",
+		GET_ALL_STACK = "adventure_get_all_stack",
+		DELETE_FROM_STACK = "adventure_delete_from_stack",
+		PUSH_TO_STACK = "adventure_push_to_stack",
 	}
-	export const enum DICE {
+	export enum DICE {
 		SIX = 6,
 		TEN = 10,
 		TWELVE = 12,
@@ -111,21 +116,22 @@ export namespace Adventure {
 	export type TCharacterAdventureData = {
 		id: number;
 		name: string;
-		character: Character.TCharacterModel;
+		character: Character.TCharacter;
 		createdAt: Date;
 		updatedAt: Date | null;
 	};
 
 	export interface IAdventure {
+		_id?: Document['_id'],
 		name: string;
 		notes: INote[];
-		characters: Character.TCharacterModel[];
+		characters: Character.TCharacter[];
 		createdAt: Date;
 		updatedAt: Date | null;
 	}
 
 	export interface INote {
-		_id?: number;
+		_id?: Document['_id'];
 		createdAt: Date;
 		updatedAt: Date | null;
 		sendBy: Types.ObjectId;
@@ -165,7 +171,7 @@ export namespace Adventure {
 
 export namespace Character {
 
-	export const enum RACES {
+	export enum RACES {
 		ELF = "Elf",
 		HALF_ELF = "Fél-elf",
 		HUMAN = "Ember",
@@ -173,7 +179,7 @@ export namespace Character {
 		ORC = "Udvari Ork"
 	}
 
-	export const enum MAIN_CLASSES {
+	export enum MAIN_CLASSES {
 		WARRIOR = "Harcos",
 		BOUNTY_HUNTER = "Szerencsevadász",
 		PRIEST = "Pap",
@@ -182,7 +188,7 @@ export namespace Character {
 		ELEM_MAGE = "Elementális varázshasználó",
 	}
 
-	export const enum CLASSES {
+	export enum CLASSES {
 		WARRIOR = "Harcos",
 		GLADIATOR = "Gladiátor",
 		BOUNTY_HUNTER = "Fejvadász",
@@ -201,7 +207,7 @@ export namespace Character {
 		SHAMAN = "Sámán",
 	}
 
-	export const enum PRIMARY_STATS {
+	export enum PRIMARY_STATS {
 		AST = "Asztrál",
 		INT = "Intelligencia",
 		STR = "Erő",
@@ -214,33 +220,38 @@ export namespace Character {
 		LUC = "Szerencse",
 	}
 
-	export const enum SECONDARY_STAT_LEVEL {
+	export enum SECONDARY_STATS {
+		"lovaglás",
+		"úszás"
+	}
+
+	export enum SECONDARY_STAT_LEVEL {
 		BASIC = "Alap",
 		MASTER = "Mester",
 		PLACEHOLDER = "Application.PLACEHOLDER",
 	}
 
-	export const enum RESOURCE_TYPE {
+	export enum RESOURCE_TYPE {
 		MANA = "Mana",
 		ENERGY = "Energia",
 		RAGE = "Düh",
 	}
 
-	export const enum HM {
+	export enum HM {
 		ATK = "TÁ",
 		DEF = "VÉ",
 		INI = "KE",
 		AIM = "CÉ"
 	}
 
-	export const enum SPELL_TYPE {
+	export enum SPELL_TYPE {
 		HEAL = "Gyógyítás",
 		HOT = "Több körös gyógyítás",
 		DOT = "Több körös sebzés",
 		AURA = "Buff",
 	}
 
-	export const enum SPELL_COST_TYPE {
+	export enum SPELL_COST_TYPE {
 		ONCE = "Egyszer",
 		DOT = "Több körön keresztül",
 		AURA = "Folyamatos",
@@ -259,32 +270,44 @@ export namespace Character {
 	]
 
 	export enum REQUEST {
-		CHARACTER_DB_GET = "character_db_get",
-		CHARACTER_DB_GET_ALL = "character_db_get_all",
-		CHARACTER_DB_DELETE = "character_db_delete",
-		CHARACTER_DB_CREATE = "character_db_create",
-		CHARACTER_UPDATE = "character_update",
-		CHARACTER_GET = "character_get",
-		CHARACTER_GET_ALL = "character_get_all",
-		CHARACTER_SET_SOCKET_ID = "character_set_socket_id",
-		CHARACTER_PUSH_TO_STACK = "character_push_to_stack",
-		CHARACTER_DELETE_FROM_STACK = "character_delete_from_stack",
+		CREATE = "character_create",
+		UPDATE = "character_update",
+		GET = "character_get",
+		GET_ALL = "character_get_all",
+		DELETE = "character_delete",
+		GET_STACK = "character_get_stack",
+		GET_ALL_STACK = "character_get_all_stack",
+		DELETE_FROM_STACK = "character_delete_from_stack",
+		PUSH_TO_STACK = "character_push_to_stack",
+
+		RACE_CREATE = "character_race_create",
+		RACE_UPDATE = "character_race_update",
+		RACE_GET = "character_race_get",
+		RACE_GET_ALL = "character_race_get_all",
+		RACE_DELETE = "character_race_delete",
+
+		CLASS_CREATE = "character_class_create",
+		CLASS_UPDATE = "character_class_update",
+		CLASS_GET = "character_class_get",
+		CLASS_GET_ALL = "character_class_get_all",
+		CLASS_DELETE = "character_class_delete",
 	}
 
-	export type TCharacterModel = {
-		id: string;
-		ownerId: string;
-		level: TLevelElements;
-		race: RACES;
-		class: CLASSES;
+	export type TCharacter = {
+		userId: Types.ObjectId;
+		level: TLevel;
+		race: RACES | Types.ObjectId;
+		class: CLASSES | Types.ObjectId;
 		rp: TRpElements;
-		hm: THmElements;
+		hm: THm;
 		primaryStats: TPrimaryStat[];
-		secondaryStats: TSecondaryStatElements[];
+		secondaryStats: TSecondaryStat[];
 		spells: Spell.TSpellElements[];
+		adventure: Types.ObjectId;
+		inventory: Item.TInventory;
 	};
 
-	export type TLevelElements = {
+	export type TLevel = {
 		current: number;
 		currentXp: number;
 		nextXp: number;
@@ -292,18 +315,13 @@ export namespace Character {
 
 	// CHARACTER STATS
 
-	export type TPrimaryStat = {
-		name: PRIMARY_STATS;
-		val: number;
-	};
-
-	export type TSecondaryStatElements = {
+	export type TSecondaryStat = {
 		name: string;
 		level: Character.SECONDARY_STAT_LEVEL;
 		skill: number;
 	};
 
-	export type THmElements = {
+	export type THm = {
 		ATK: THmElementsValue;
 		DEF: THmElementsValue;
 		INI: THmElementsValue;
@@ -334,54 +352,49 @@ export namespace Character {
 		bornPlace: string;
 		schools: string[];
 		personality: string;
+		knownLanguages: string[];
+		professions: string[];
 	};
 
 	// MODELS
 	
-	export type TRaceModel = {
+	export type TPrimaryStat = {
+		name: PRIMARY_STATS;
+		val: number;
+		lvlReq?: number;
+	};
+	
+	export type TRace = {
 		name: Character.RACES;
 		modifiers: {
-			primaryStat: {
-				lvlReq: number;
-				val: TPrimaryStat
-			}[];
-			secondaryStat: ISecStatScalingModel[];
-			hm: THmElements;
+			primaryStats: TPrimaryStat[];
+			secondaryStatScaling: ISecondaryStatScaling[];
+			hm: THm;
 		};
 		description: string;
 	};
 
-	export type TClassModel = {
+	export type TScaling = {
+		initial: number;
+		perLvl: number;
+	}
+
+	export type TClass = {
 		name: Character.CLASSES;
 		mainClass: Character.MAIN_CLASSES;
 		modifiers: {
-			primaryStat: {
-				name: PRIMARY_STATS;
-				val: Adventure.TRollElements;
-			}[];
-			secondaryStat: ISecondaryStat[];
-			secondaryStatScaling: ISecStatScalingModel[];
-			hm: THmElements;
-			hmPlus: {
-				inital: number;
-				perLvl: number;
-			};
-			proffesionPoints: {
-				inital: number;
-				perLvl: number;
-			};
 			hp: number;
 			ep: number;
+			primaryStats: TPrimaryStat[];
+			secondaryStats: TSecondaryStat[];
+			secondaryStatScaling: ISecondaryStatScaling[];
+			secondaryStatPlus: TScaling;
+			hm: THm;
+			hmPlus: TScaling;
 		};
 	};
 
-	export interface ISecondaryStat {
-		name: string;
-		level: Character.SECONDARY_STAT_LEVEL;
-		skill: number;
-	}
-
-	export interface ISecStatScalingModel {
+	export interface ISecondaryStatScaling {
 		lvlReq: number;
 		lvl: SECONDARY_STAT_LEVEL;
 		val?: number;
@@ -429,13 +442,13 @@ export namespace Character {
 	// ITEMS
 
 	export namespace Item {
-		export const enum MONEY {
+		export enum MONEY {
 			GOLD = "Gold",
 			SILVER = "Silver",
 			COPPER = "Copper",
 		}
 
-		export const enum ITEM_TYPE_EQUIPPABLE {
+		export enum ITEM_TYPE_EQUIPPABLE {
 			HEAD = "Fejes",
 			NECK = "Nyaklánc",
 			SHOULDER = "Vállas",
@@ -449,6 +462,11 @@ export namespace Character {
 			WEP2H = "Kétkezes fegyver",
 			WEP1H = "Egykezes fegyver",
 		}
+
+		export type TInventory = {
+			backpacks: TBackpack[];
+			money: TMoney;
+		};
 
 		export type TMoney = [
 			{
@@ -466,13 +484,15 @@ export namespace Character {
 		];
 
 		export type TItemSize = {
-			x: number;
-			y: number;
+			sizeX: number;
+			sizeY: number;
+			placeX: number;
+			placeY: number;
 			weight: number;
 		};
 
 		export type TItem = {
-			hm: Character.THmElements;
+			hm: Character.THm;
 			name: string;
 			description: string;
 			size: TItemSize;
@@ -480,7 +500,6 @@ export namespace Character {
 
 		export type TBackpack = {
 			size: Item.TItemSize;
-			money: Item.TMoney;
 			items: Array<Item.TItem>;
 		};
 	}
@@ -492,21 +511,20 @@ export namespace Character {
 
 export namespace User {
 
-	export const enum ERROR {
+	export enum ERROR {
 		ALREADY_LOGGED_IN = "already_logged_in",
 	}
 
 	export enum REQUEST {
-		USER_DB_GET = "user_db_get",
-		USER_DB_GET_ALL = "user_db_get_all",
-		USER_DB_DELETE = "user_db_delete",
-		USER_DB_CREATE = "USER_DB_CREATE",
-		USER_UPDATE = "user_update",
-		USER_GET = "user_get",
-		USER_GET_ALL = "user_get_all",
-		USER_SET_SOCKET_ID = "user_set_socket_id",
-		USER_PUSH_TO_STACK = "user_push_to_stack",
-		USER_DELETE_FROM_STACK = "user_delete_from_stack",
+		CREATE = "user_create",
+		UPDATE = "user_update",
+		GET = "user_get",
+		GET_ALL = "user_get_all",
+		DELETE = "user_delete",
+		GET_STACK = "user_get_stack",
+		GET_ALL_STACK = "user_get_all_stack",
+		DELETE_FROM_STACK = "user_delete_from_stack",
+		PUSH_TO_STACK = "user_push_to_stack",
 	}
 
 	export enum USER_RANK {
