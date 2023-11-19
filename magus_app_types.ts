@@ -171,7 +171,7 @@ export namespace Adventure {
 
 export namespace Character {
 
-	export enum RACES {
+	export enum DESCENTS {
 		ELF = "Elf",
 		HALF_ELF = "Fél-elf",
 		HUMAN = "Ember",
@@ -280,11 +280,11 @@ export namespace Character {
 		DELETE_FROM_STACK = "character_delete_from_stack",
 		PUSH_TO_STACK = "character_push_to_stack",
 
-		RACE_CREATE = "character_race_create",
-		RACE_UPDATE = "character_race_update",
-		RACE_GET = "character_race_get",
-		RACE_GET_ALL = "character_race_get_all",
-		RACE_DELETE = "character_race_delete",
+		DESCENT_CREATE = "character_descent_create",
+		DESCENT_UPDATE = "character_descent_update",
+		DESCENT_GET = "character_descent_get",
+		DESCENT_GET_ALL = "character_descent_get_all",
+		DESCENT_DELETE = "character_descent_delete",
 
 		CLASS_CREATE = "character_class_create",
 		CLASS_UPDATE = "character_class_update",
@@ -296,7 +296,7 @@ export namespace Character {
 	export type TCharacter = {
 		userId: Types.ObjectId;
 		level: TLevel;
-		race: RACES | Types.ObjectId;
+		descent : DESCENTS | Types.ObjectId;
 		class: CLASSES | Types.ObjectId;
 		rp: TRpElements;
 		hm: THm;
@@ -307,6 +307,32 @@ export namespace Character {
 		inventory: Item.TInventory;
 	};
 
+	
+	export type TDescent = {
+		name: Character.DESCENTS;
+		modifiers: {
+			primaryStats: TPrimaryStat[];
+			secondaryStatScaling: ISecondaryStatScaling[];
+			hm: THm;
+		};
+		description: string;
+	};
+
+	export type TClass = {
+		name: Character.CLASSES;
+		mainClass: Character.MAIN_CLASSES;
+		modifiers: {
+			hp: number;
+			ep: number;
+			primaryStats: TPrimaryStat[];
+			secondaryStats: TSecondaryStat[];
+			secondaryStatScaling: ISecondaryStatScaling[];
+			secondaryStatPlus: TScaling;
+			hm: THm;
+			hmPlus: TScaling;
+		};
+	};
+
 	export type TLevel = {
 		current: number;
 		currentXp: number;
@@ -314,12 +340,33 @@ export namespace Character {
 	};
 
 	// CHARACTER STATS
+	export type TPrimaryStat = {
+		name: PRIMARY_STATS;
+		val: number;
+		lvlReq?: number;
+	};
 
 	export type TSecondaryStat = {
 		name: string;
 		level: Character.SECONDARY_STAT_LEVEL;
 		skill: number;
 	};
+
+	
+	export interface ISecondaryStatScaling {
+		lvlReq: number;
+		lvl: SECONDARY_STAT_LEVEL;
+		val?: number;
+		to?: {
+			lvl: SECONDARY_STAT_LEVEL;
+			newVal: number;
+		}
+	}
+
+	export type TScaling = {
+		initial: number;
+		perLvl: number;
+	}
 
 	export type THm = {
 		ATK: THmElementsValue;
@@ -329,10 +376,9 @@ export namespace Character {
 		hmPerLvl: number;
 	};
 
-	type THmElementsValue = {
+	export type THmElementsValue = {
 		base: number;
 		fromGear: number;
-		total: number;
 	}
 
 	export type TRpElements = {
@@ -355,54 +401,6 @@ export namespace Character {
 		knownLanguages: string[];
 		professions: string[];
 	};
-
-	// MODELS
-	
-	export type TPrimaryStat = {
-		name: PRIMARY_STATS;
-		val: number;
-		lvlReq?: number;
-	};
-	
-	export type TRace = {
-		name: Character.RACES;
-		modifiers: {
-			primaryStats: TPrimaryStat[];
-			secondaryStatScaling: ISecondaryStatScaling[];
-			hm: THm;
-		};
-		description: string;
-	};
-
-	export type TScaling = {
-		initial: number;
-		perLvl: number;
-	}
-
-	export type TClass = {
-		name: Character.CLASSES;
-		mainClass: Character.MAIN_CLASSES;
-		modifiers: {
-			hp: number;
-			ep: number;
-			primaryStats: TPrimaryStat[];
-			secondaryStats: TSecondaryStat[];
-			secondaryStatScaling: ISecondaryStatScaling[];
-			secondaryStatPlus: TScaling;
-			hm: THm;
-			hmPlus: TScaling;
-		};
-	};
-
-	export interface ISecondaryStatScaling {
-		lvlReq: number;
-		lvl: SECONDARY_STAT_LEVEL;
-		val?: number;
-		to?: {
-			lvl: SECONDARY_STAT_LEVEL;
-			newVal: number;
-		}
-	}
 
 	// SPELLS
 
@@ -455,7 +453,7 @@ export namespace Character {
 			BACK = "Köpeny",
 			CHEST = "Pámcél",
 			GLOVES = "Kesztyű",
-			BRACERS = "Karperec",
+			BDESCENTRS = "Karperec",
 			LEGS = "Nadrág",
 			BOOTS = "Csizma",
 			ACCESSORY = "Kiegészítő",
