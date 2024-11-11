@@ -17,7 +17,7 @@ export const SERVER: TRouteConfig = {
 }
 
 export const CLIENT: TRouteConfig = {
-    URI: "http://127.0.0.1",
+    URI: "http://localhost",
     PORT: 5173,
     get GET_URI(){
         return `${this.URI}:${this.PORT}`;

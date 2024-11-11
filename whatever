@@ -1,0 +1,47 @@
+Folders:
+src → 📦 Source code icon
+config → ⚙️ Configuration settings icon
+assets → 🖼️ Asset/image folder icon
+public → 🌐 Globe/public folder icon
+static → 📁 Static assets icon
+controllers → 🔧 Wrench or settings icon
+models → 🗂️ Database or table icon
+views → 👀 Eye or screen icon
+services → 🛠️ Toolbox icon
+routes → 🚥 Routing/connection icon
+test or tests → 🧪 Beaker/lab test icon
+logs → 📜 Log sheet icon
+lib → 📚 Library/book icon
+middleware → 🔗 Chain icon
+utils or helpers → 🛠️ Wrench or utility tools icon
+db → 🛢️ Database barrel icon
+docs → 📄 Document/paper icon
+build → 🏗️ Construction/building icon
+dist → 📦 Distribution box icon
+node_modules → 📦 Box (Node package folder icon)
+env → 🌱 Leaf/environment icon
+bin → 🗑️ Trash or bin icon
+scripts → 📜 Script or scroll icon
+examples → 💡 Lightbulb/example icon
+migrations → ⏳ Hourglass or change tracking icon
+Files:
+.gitignore → 🚫 Git ignore symbol icon
+README.md → 📖 Open book/readme icon
+package.json → 📦 NPM box icon
+Dockerfile → 🐳 Docker whale icon
+.env → 🌱 Leaf/environment icon
+webpack.config.js → ⚙️ Gear with a "W" icon
+tsconfig.json → 🔧 Gear icon (TypeScript config)
+babel.config.js → 🚀 Rocket icon
+yarn.lock → 🔒 Lock icon (Yarn lockfile)
+Makefile → 🔨 Hammer icon
+index.js → 🗂️ Generic JavaScript icon
+app.js → 🗂️ Generic JavaScript icon
+server.js → 🌐 Server globe icon
+license or LICENSE → 📜 Scroll/license icon
+jest.config.js → 🧪 Beaker (Jest config icon)
+tslint.json or .eslintrc → 🚨 Lint warning icon
+commitlint.config.js → 📝 Notepad/edit icon
+Procfile → 📜 Document icon (Heroku)
+tailwind.config.js → 🌬️ Tailwind swirl icon
+postcss.config.js → ✨ Sparkle icon
