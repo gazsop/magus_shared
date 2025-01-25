@@ -709,6 +709,7 @@ export namespace Character {
         amount: number;
         item: Item.TItem;
       }>;
+      type: "basic" | "bag" | "sack";
     };
   }
 }
