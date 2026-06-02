@@ -278,6 +278,17 @@ export namespace ServerApi {
       deleted: true;
     };
 
+    export type MarkerDeletedEvent = {
+      advId: string;
+      id: string;
+      scope: MarkerScope;
+    };
+
+    export type MarkerUpsertedEvent = {
+      advId: string;
+      marker: Marker;
+    };
+
     export type RevealMarkerBody = {
       id: string;
     };
