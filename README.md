@@ -8,7 +8,7 @@ This folder is the contract layer between frontend and backend:
 
 - shared request/response and domain types
 - shared constants
-- shared runtime route/environment configuration
+- shared runtime route configuration
 
 ## Module Structure
 
@@ -30,17 +30,9 @@ Legacy compatibility files remain:
 - `shared_constants.ts`
 - `shared_config.ts`
 
-## Environment
+## Runtime Config
 
-Template currently:
-
-```env
-MACHINE=IRODA
-```
-
-`shared_config.ts` expects `MACHINE` to resolve local host behavior. `VITE_MACHINE` is accepted only as a legacy fallback.
-
-Recommended template file name is `.env_template`. Legacy `.env _template` is still present in this workspace.
+`shared_config.ts` resolves client/server host and port settings from the selected runtime mode. App-specific secrets and deployment environment values belong in the client or server project env files, not in `shared`.
 
 ## Usage
 

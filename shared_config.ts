@@ -1,6 +1,3 @@
-import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
-
 export type TRouteConfig = {
 	URI: string,
 	PORT: number,
@@ -16,7 +13,6 @@ type TRouteConfigClient = TRouteConfig & {
 
 export class Config{
 	protected static initialized: boolean = false;
-	protected static ENV: {[key in string]: string};
 
 	protected static CONFIG_VARS = {
 		devHost: "127.0.0.1",
@@ -52,7 +48,6 @@ export class Config{
 
 	public static initialize(mode: "PRODUCTION" | "DEVELOPMENT"){
 		if(!Config.initialized){
-			Config.ENV = Config.resolveEnv(mode);
 			Config.SERVER.URI = mode === "PRODUCTION" ?
 				Config.CONFIG_VARS.host :
 				Config.CONFIG_VARS.devHost;
@@ -65,51 +60,6 @@ export class Config{
 			Config.initialized = true;
 			return Config;
 		}
-	}
-
-	protected static resolveEnv(mode: "PRODUCTION" | "DEVELOPMENT"): {[key: string]: string} {
-		// 1) Prefer runtime environment (server/client process env)
-		const runtimeEnv: {[key: string]: string} = {};
-		Object.entries(process.env || {}).forEach(([key, value]) => {
-			if (typeof value === "string") runtimeEnv[key] = value;
-		});
-
-		// 2) Fallback chain: shared + server env files
-		const envPaths: string[] = [
-			".env",
-			mode === "PRODUCTION" ? ".env.production" : ".env.development",
-			join("..", "magus_server", ".env"),
-			join("..", "magus_server", mode === "PRODUCTION" ? ".env.production" : ".env.development"),
-		];
-
-		const fileEnv = envPaths.reduce((acc, relPath) => {
-			const parsed = Config.parseKeyValueFile(relPath);
-			return { ...acc, ...parsed };
-		}, {} as {[key: string]: string});
-
-		// Runtime env has precedence over file fallback.
-		return { ...fileEnv, ...runtimeEnv };
-	}
-
-	protected static parseKeyValueFile(path: string): {[x: string]: string} {
-		const envPath = join(__dirname, path);
-		if (!existsSync(envPath)) return {};
-		const content = readFileSync (envPath, 'utf-8');
-		const lines = content.split(/\r?\n/);
-		const result: {[key in string]: string} = {};
-		for (const line of lines) {
-			const trimmed = line.trim();
-			if (!trimmed || trimmed.startsWith('#')) continue;           // skip empty or comment lines
-			const [key, ...rest] = trimmed.split('=');
-			if (!key) continue;
-			const value = rest.join('=');
-			result[key] = value;
-		}
-		return result;
-	}
-	
-	public static get getEnv() : Object {
-		return Config.ENV;
 	}
 
 	public static get getServer(): TRouteConfig {
