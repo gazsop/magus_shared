@@ -340,7 +340,7 @@ export namespace ServerApi {
       storageId?: string;
     };
 
-    export type BagEquipmentSlotId = "bag1" | "bag2" | "bag3" | "bag4";
+    export type BagEquipmentSlotId = "bag" | "satchel";
 
     export type CreateBody = {
       name: string;

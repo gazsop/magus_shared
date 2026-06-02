@@ -77,15 +77,16 @@ Client and server import from this folder via path aliases:
 - Character inventory entries may add per-instance auras through:
   - `additionalAuras` (appended to the base item aura list at runtime)
 - Default storage behavior:
-  - fixed `4x2` (`8` slots)
   - represented as `isDefault: true` and `id: "storage_default"`
+  - slot count is the character class `maxCarriedWeapons` value, with a fallback of `2`
+  - accepts only one-slot weapons and shields
   - shared constants/helpers live in `shared/game/inventory.ts`
-- Bag instances are first-class inventory entries via optional `bag` payload:
+- Bag and satchel instances are first-class inventory entries via optional `bag` payload:
   - `bag.state`: `"equipped"` or `"stored"`
   - `bag.size`, `bag.maxSlots`, optional aura payload
-- Bag equipment slots are shared constants in `shared/game/inventory.ts`: `bag1`, `bag2`, `bag3`, and `bag4`.
-- Equipped bag entries link to non-default `backpacks[]` by `bag.id`; dropping a bag removes the linked storage and contents.
-- Item definitions can set `createsInventorySpace` with `storage` settings so each item instance creates a linked non-default storage space.
+- Bag equipment slots are shared constants in `shared/game/inventory.ts`: `bag` and `satchel`.
+- Equipped bag/satchel entries link to non-default `backpacks[]` by `bag.id`; non-empty bag/satchel removal is blocked.
+- Bag/satchel item definitions force `createsInventorySpace`, `maxStack = 1`, and `consumable = false`.
 - Item definitions can carry an optional `priceCopper` base price. Shared money
   UI helpers convert values with `1 gold = 10 silver` and
   `1 silver = 100 copper`.
@@ -108,7 +109,7 @@ Client and server import from this folder via path aliases:
 - Roll metadata is sourced from class/descent definitions and not required on character rows.
 - Class modifiers include both `initialSecondarySkillPoints` (starting pool) and
   `secondarySkillPointsPerLvl` (per-level gain).
-- Character class definitions may include `maxCarriedWeapons`; legacy entries without it are treated as `0` until saved.
+- Character class definitions may include `maxCarriedWeapons`; missing entries fall back to `2` for default weapon rack sizing.
 - Secondary skill entries may include an optional `note` string for admin-authored guidance; display rows sort with Hungarian collation.
 - Pure roll range/format helpers live in `shared/game/roll.ts`.
 

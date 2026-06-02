@@ -745,7 +745,8 @@ export namespace Character {
       SHIELD = "Pajzs",
       WEP2H = "Kétkezes fegyver",
       WEP1H = "Egykezes fegyver",
-      STORAGE = "Tarolo",
+      BAG = "Táska",
+      SATCHEL = "Szatyor",
     }
 
     export type TItemAuraApplyWhen = "equipped" | "carried";
@@ -866,7 +867,7 @@ export namespace Character {
         placement?: TItemPlacement;
         bag?: TBagInstance;
       }>;
-      type: "basic" | "bag" | "sack";
+      type: "basic" | "bag" | "satchel";
     };
   }
 }
