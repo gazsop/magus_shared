@@ -453,7 +453,7 @@ export namespace ServerApi {
 
   export namespace AiRoutes {
     export type ChatMessage = {
-      role: "system" | "user" | "assistant";
+      role: "user" | "assistant";
       content: string;
     };
 

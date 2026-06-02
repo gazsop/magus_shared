@@ -454,6 +454,7 @@ export namespace Character {
     id: string;
     name: Character.CLASSES;
     mainClass: Character.MAIN_CLASSES;
+    maxCarriedWeapons?: number;
     modifiers: {
       hp: number;
       hpLvlScaling: Adventure.TRollElements;

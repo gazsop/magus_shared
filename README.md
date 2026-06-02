@@ -108,6 +108,7 @@ Client and server import from this folder via path aliases:
 - Roll metadata is sourced from class/descent definitions and not required on character rows.
 - Class modifiers include both `initialSecondarySkillPoints` (starting pool) and
   `secondarySkillPointsPerLvl` (per-level gain).
+- Character class definitions may include `maxCarriedWeapons`; legacy entries without it are treated as `0` until saved.
 - Secondary skill entries may include an optional `note` string for admin-authored guidance; display rows sort with Hungarian collation.
 - Pure roll range/format helpers live in `shared/game/roll.ts`.
 
