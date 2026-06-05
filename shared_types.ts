@@ -102,14 +102,29 @@ export namespace Adventure {
   export type TCombatInitiative = {
     uid: string;
     name: string;
+    kind?: "character" | "npc";
+    npcId?: string;
+    side?: "friendly" | "enemy";
     baseInitiative: number;
     roll: number;
     rollSubmitted?: boolean;
     total: number;
+    hm?: Character.THm;
+    resource?: Character.TResource;
+    primaryStats?: Character.TPrimaryStat[];
+    adminNotes?: string;
+    notes?: string;
+    avatar?: Character.TImageMeta | null;
+    lootItems?: Npc.TNpcLootItem[];
+    moneyCopper?: number;
+    damageLog?: Character.TDamageLogEntry[];
   };
   export type TCombatState = {
     enabled: boolean;
     turn: number;
+    combatId?: string | null;
+    combatName?: string;
+    adminNote?: string;
     initiatives: TCombatInitiative[];
   };
   export enum REQUEST {
@@ -934,6 +949,51 @@ export namespace Vendor {
     requestedPriceCopper?: number;
     suggestedPriceCopper: number;
     finalPriceCopper?: number;
+  };
+}
+
+/*********************************************
+ ******************* NPC TYPES****************
+ *********************************************/
+
+export namespace Npc {
+  export type TNpcLootItem = {
+    itemName: string;
+    amount: number;
+  };
+
+  export type TNpc = {
+    id: string;
+    name: string;
+    hm: Character.THm;
+    resource: Character.TResource;
+    primaryStats: Character.TPrimaryStat[];
+    lootItems: TNpcLootItem[];
+    moneyCopper: number;
+    adminNotes: string;
+    notes: string;
+    avatar?: Character.TImageMeta | null;
+  };
+}
+
+/*********************************************
+ ***************** COMBAT TYPES***************
+ *********************************************/
+
+export namespace Combat {
+  export type TCombatNpcSide = "friendly" | "enemy";
+
+  export type TCombatNpcRef = {
+    id: string;
+    name: string;
+  };
+
+  export type TCombat = {
+    id: string;
+    name: string;
+    adminNote: string;
+    friendlyNpcs: TCombatNpcRef[];
+    enemyNpcs: TCombatNpcRef[];
   };
 }
 

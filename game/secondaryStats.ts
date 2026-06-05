@@ -15,6 +15,9 @@ const normalizePointDelta = (value: unknown): number => {
   return Math.floor(n);
 };
 
+const getSecondaryPointCost = (skillLevel: Character.SECONDARY_STAT_LEVEL) =>
+  skillLevel === Character.SECONDARY_STAT_LEVEL.BASIC ? 2 : 1;
+
 export type SecondaryStatProgress = Pick<
   Character.TSecondaryStat,
   "skillLevel" | "skill"
@@ -158,7 +161,14 @@ export const applySecondaryStatPoints = <T extends SecondaryStatProgress>(
   }
 
   if (skillLevel === Character.SECONDARY_STAT_LEVEL.BASIC) {
-    const gained = Math.ceil(remaining / 2);
+    const gained = Math.floor(remaining / getSecondaryPointCost(skillLevel));
+    if (gained < 1) {
+      return {
+        ...stat,
+        skillLevel,
+        skill,
+      };
+    }
     if (skill + gained < SECONDARY_STAT_MAX) {
       return {
         ...stat,
@@ -179,4 +189,23 @@ export const applySecondaryStatPoints = <T extends SecondaryStatProgress>(
     skillLevel,
     skill,
   };
+};
+
+export const previewSecondaryStatPointSpend = <T extends SecondaryStatProgress>(
+  stat: T,
+  points: unknown
+) => {
+  const spent = normalizePointDelta(points);
+  const before = {
+    skillLevel: stat.skillLevel || Character.SECONDARY_STAT_LEVEL.NONE,
+    skill: clampSecondarySkill(stat.skill),
+  };
+  const after = applySecondaryStatPoints(stat, spent);
+  const changed =
+    after.skillLevel !== before.skillLevel || Number(after.skill || 0) !== before.skill;
+  const canSpend =
+    spent > 0 &&
+    before.skillLevel !== Character.SECONDARY_STAT_LEVEL.MASTER &&
+    changed;
+  return { after, canSpend };
 };

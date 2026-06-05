@@ -1,4 +1,4 @@
-import { Character, Vendor } from "./types";
+import { Character, Combat, Npc, Vendor } from "./types";
 
 export namespace ServerApi {
   export type PatchOp = "add" | "replace" | "remove";
@@ -49,12 +49,86 @@ export namespace ServerApi {
       ok: true;
       sync?: PongSyncStatus;
     };
+
+    export type LiveDebugSession = {
+      uid: string;
+      name: string;
+      active: boolean;
+      lastPong: number;
+    };
+
+    export type DebugResponse = {
+      pid: number;
+      sessions: LiveDebugSession[];
+      generatedAt: number;
+    };
+
+    export type PollEvent = {
+      id: number;
+      type: string;
+      scope?: "global" | "adventure" | "chat";
+      advId?: string;
+      targetUid?: string | null;
+      payload: unknown;
+      createdAt: number;
+    };
+
+    export type PollBody = {
+      advId?: string;
+      sinceId?: number;
+      waitMs?: number;
+      batchMs?: number;
+      sync?: PongSyncSnapshot;
+    };
+
+    export type PollResponse = {
+      events: PollEvent[];
+      latestId: number;
+      timedOut: boolean;
+      sync?: PongSyncStatus;
+    };
+
+    export type PollChatBody = {
+      advId: string;
+      sinceId?: number;
+      waitMs?: number;
+      batchMs?: number;
+    };
+
+    export type PollChatResponse = {
+      events: PollEvent[];
+      latestId: number;
+      timedOut: boolean;
+    };
   }
 
   export namespace ChatRoutes {
     export type ChatPolicy = {
       allowUserDirect: boolean;
       allowUserAllRoom: boolean;
+    };
+
+    export type ChatReferenceKind = "item" | "spell" | "ynev" | "npc";
+
+    export type ChatReferenceSearchBody = {
+      query: string;
+      limit?: number;
+    };
+
+    export type ChatReferenceSearchResult = {
+      kind: ChatReferenceKind;
+      id: string;
+      label: string;
+      description?: string;
+      x?: number;
+      y?: number;
+      item?: Character.Item.TItem;
+      spell?: Character.Spell.TSpellElements | Character.Spell.ISpellLevel;
+      npc?: Omit<Npc.TNpc, "adminNotes">;
+    };
+
+    export type ChatReferenceSearchResponse = {
+      results: ChatReferenceSearchResult[];
     };
 
     export type GetConversationBody = {
@@ -77,20 +151,32 @@ export namespace ServerApi {
       limit?: number;
     };
 
-    export type AllRoomEventSourceType = "ynev_marker" | (string & {});
+    export type AllRoomSourceType = "ynev_marker" | "jotunder_ai" | (string & {});
 
     export type AllRoomMessage = {
       id: string;
       uid: string;
       text: string;
       createdAt: number;
-      sourceType?: AllRoomEventSourceType;
+      sourceType?: AllRoomSourceType;
       sourceId?: string;
     };
 
     export type SendAllRoomBody = {
       advId: string;
       text: string;
+    };
+
+    export type DeleteAllRoomBody = {
+      advId: string;
+      messageId: string;
+    };
+
+    export type AllRoomDeletedEvent = {
+      advId: string;
+      messageId: string;
+      deletedByUid: string;
+      createdAt: number;
     };
 
     export type TypingBody = {
@@ -143,6 +229,30 @@ export namespace ServerApi {
       limit?: number;
     };
 
+    export type SubmitBugReportBody = {
+      content: string;
+      status?: "open";
+    };
+
+    export type BugReport = {
+      id?: number;
+      createdAt: number;
+      uid: string | null;
+      uname: string | null;
+      content: string;
+      status: "open";
+      userAgent?: string | null;
+      path?: string | null;
+    };
+
+    export type GetBugReportsBody = {
+      limit?: number;
+    };
+
+    export type DeleteBugReportBody = {
+      id: number;
+    };
+
     export type GetRuntimeStateBody = {
       includeCharacters?: boolean;
     };
@@ -150,6 +260,20 @@ export namespace ServerApi {
     export type UpdateXpLevelsBody = UpdateGuards;
 
     export type UpdateVendorBody = UpdateGuards;
+
+    export type UpdateNpcBody = UpdateGuards;
+
+    export type GetAllNpcsResponse = {
+      npcs: Npc.TNpc[];
+      hash: string;
+    };
+
+    export type UpdateCombatBody = UpdateGuards;
+
+    export type GetAllCombatsResponse = {
+      combats: Combat.TCombat[];
+      hash: string;
+    };
   }
 
   export namespace UserRoutes {
@@ -327,9 +451,25 @@ export namespace ServerApi {
       vendorId?: string;
     };
 
+    export type SetCombatStateBody = {
+      advId: string;
+      enabled: boolean;
+      turn?: number;
+      combatId?: string;
+    };
+
     export type SubmitCombatInitiativeBody = {
       advId: string;
       roll: number;
+    };
+
+    export type CombatNpcResourceAction = "damage" | "healHp" | "healEp" | "resourceDelta";
+
+    export type UpdateCombatNpcResourceBody = {
+      advId: string;
+      npcUid: string;
+      action: CombatNpcResourceAction;
+      amount: number;
     };
   }
 
@@ -377,15 +517,30 @@ export namespace ServerApi {
       xpDelta: number;
     };
 
+    export type GrantItemBody = {
+      advId: string;
+      uid: string;
+      itemName: string;
+      amount?: number;
+    };
+
     export type ApplyLevelUpBody = {
       advId: string;
       uid: string;
       hpGains: number[];
       resourceGains: number[];
       hmAlloc: Character.THm;
-      secondaryAlloc: Record<string, number>;
+      secondaryAlloc?: Record<string, number>;
       levelUps: number;
       specialization?: string;
+    };
+
+    export type SpendSecondarySkillPointsBody = {
+      advId: string;
+      uid: string;
+      expectedHash: string;
+      statId: string;
+      points: number;
     };
 
     export type DropItemBody = {
@@ -417,6 +572,57 @@ export namespace ServerApi {
     export type VendorTradeResponse = {
       trade: Vendor.TVendorTrade;
       vendor: Vendor.TVendorState;
+    };
+
+    export type PlayerTradeStatus = "pending" | "cancelled" | "completed";
+
+    export type PlayerTradeOffer = {
+      items: ItemActionSource[];
+      moneyCopper: number;
+    };
+
+    export type PlayerTradeParticipant = {
+      uid: string;
+      accepted: boolean;
+      offer: PlayerTradeOffer;
+    };
+
+    export type PlayerTradeState = {
+      id: string;
+      advId: string;
+      fromUid: string;
+      toUid: string;
+      status: PlayerTradeStatus;
+      createdAt: number;
+      updatedAt: number;
+      closedByUid?: string;
+      participants: Record<string, PlayerTradeParticipant>;
+    };
+
+    export type CreatePlayerTradeBody = {
+      advId: string;
+      toUid: string;
+    };
+
+    export type UpdatePlayerTradeOfferBody = {
+      advId: string;
+      tradeId: string;
+      offer: PlayerTradeOffer;
+    };
+
+    export type AcceptPlayerTradeBody = {
+      advId: string;
+      tradeId: string;
+    };
+
+    export type ClosePlayerTradeBody = {
+      advId: string;
+      tradeId: string;
+    };
+
+    export type PlayerTradeResponse = {
+      trade: PlayerTradeState;
+      characters?: Array<Character.TCharacterServer>;
     };
 
     export type UseItemBody = {

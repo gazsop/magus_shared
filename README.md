@@ -87,6 +87,7 @@ Client and server import from this folder via path aliases:
 - Bag equipment slots are shared constants in `shared/game/inventory.ts`: `bag` and `satchel`.
 - Equipped bag/satchel entries link to non-default `backpacks[]` by `bag.id`; non-empty bag/satchel removal is blocked.
 - Bag/satchel item definitions force `createsInventorySpace`, `maxStack = 1`, and `consumable = false`.
+- Bag/satchel items can be carried inside active equipped bag/satchel storage. Shared server placement first tries active non-default storage, then auto-equips a bag/satchel into the matching empty equipment slot when storage placement is unavailable.
 - Item definitions can carry an optional `priceCopper` base price. Shared money
   UI helpers convert values with `1 gold = 10 silver` and
   `1 silver = 100 copper`.
@@ -103,6 +104,13 @@ Client and server import from this folder via path aliases:
 - Item auras use `Character.Item.TItemAura` with the same array-based `effect` / `modifiers` pattern.
 - Item aura `applyWhen` defaults to `equipped`; `carried` item auras apply from inventory and equipped slots.
 
+## Player Trade Contract Notes
+
+- Player character trades are adventure-scoped and use `ServerApi.CharacterRoutes.PlayerTradeState`.
+- A trade participant offer contains inventory/equipment item sources plus `moneyCopper`.
+- Both participants must accept the current offers before finalization.
+- The backend revalidates item sources and money during finalization and rejects stale offers.
+
 ## Character Stat Storage Notes
 
 - Character `primaryStats` persistence is value-focused (`name` + `val`).
@@ -116,4 +124,5 @@ Client and server import from this folder via path aliases:
 ## Runtime State Notes
 
 - Adventure combat runtime state uses `Adventure.TCombatState`.
-- Combat start includes per-character initiative rows with `baseInitiative`, a pending/submitted `k10` roll state, and total initiative.
+- Saved combat definitions use `Combat.TCombat` with friendly/enemy NPC references.
+- Combat start includes per-character initiative rows with `baseInitiative`, a pending/submitted `k10` roll state, NPC rows from the selected combat including `Character.TResource`, and total initiative.
